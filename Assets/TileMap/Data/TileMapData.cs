@@ -1,30 +1,54 @@
-﻿
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-public class TileMapData
+public class TileMapData : MonoBehaviour
 {
-	TileData[] tiles;
-	int width;
-	int height;
+	// TODO: Explore other data storage options
+	[SerializeField] TextAsset mapDataText;
+	int[][] mapData;
 
 
-	public TileMapData(int width, int height)
+	void Awake()
 	{
-		this.width = width;
-		this.height = height;
-
-		tiles = new TileData[width * height];
+		mapData = ParseTextToMapData(mapDataText);
 	}
 
-	// Returns the tile at the specified (x,y) coordinate
-	// Returns null if tile is outside of range
-	public TileData GetTile(int x, int y)
+
+	// Decrypts CSV map data file into a 2D int array of tile data
+	int[][] ParseTextToMapData(TextAsset mapDataText)
 	{
-		// TODO: Proper try/catch handling
-		if (x < 0 || x >= width || y < 0 || y >= height)
+		// Split each line to a string[]
+		string[] lines = mapDataText.text.Split('\n');
+
+		// Initialize number of rows in mapData
+		int[][] mapData = new int[lines.Length][];
+
+
+		// Parse each line into an int[]
+		for (int i = 0; i < lines.Length; i++)
 		{
-			return null;
+			// Split each entry from current line to a string
+			string[] entriesString = lines[i].Split(',');
+
+			// Initialize int[] to store converted strings
+			int[] entries = new int[entriesString.Length];
+
+			// Convert each entry to an int and store in mapData
+			for (int j = 0; j < entriesString.Length; j++)
+			{
+				int.TryParse(entriesString[j], out entries[j]);
+				mapData[i] = entries;
+			}
 		}
-		
-		return tiles[y * width + x];
+		return mapData;
+	}
+
+
+	// Public functions for inspector mode
+	public void InspectorRefresh()
+	{
+		Awake();
 	}
 }

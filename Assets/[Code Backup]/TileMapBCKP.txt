@@ -5,8 +5,15 @@ using UnityEngine;
 [RequireComponent (typeof(MeshFilter))]
 [RequireComponent (typeof(MeshRenderer))]
 [RequireComponent (typeof(MeshCollider))]
-public class TileMap : MonoBehaviour
+[RequireComponent (typeof(TileMapData))]
+public class TileMapGFX : MonoBehaviour
 {
+	// DEBUG
+	public int dbg_TileNumber;
+
+	// Tileset to load tiles from
+	[SerializeField] TileSet tileSet;
+
 	// Dimensions of tilemap in terms of tiles
 	public int numTilesX;
 	public int numTilesZ;
@@ -15,38 +22,20 @@ public class TileMap : MonoBehaviour
 	// Unity scale of the tilemap
 	public float tileScale = 1.0f;
 
-	// TODO: Make tileset data separate class
-	// Tileset data
-	public Texture2D tileSet;
-	public int tileSetNumTilesWide;
 
-	int tileSetResolution;
-	int tileSetNumTilesHigh;
-	int tileSetNumTiles;
-
-
-	// Initialize here
-	void Start ()
+	void Awake()
 	{
 		// Initialize tilemap data
 		numTiles = numTilesX * numTilesZ;
+	}
 
-		// TODO: Make tileset data separate class
-		// Initialize tileset data
-		tileSetResolution = tileSet.width / tileSetNumTilesWide;
-		tileSetNumTilesHigh = tileSet.height / tileSetResolution;
-		tileSetNumTiles = tileSetNumTilesHigh * tileSetNumTilesWide;
-
-		// Make sure tileset texture is divided evenly into tiles
-		if(tileSet.width % tileSetNumTilesWide != 0 || tileSet.height % tileSetNumTilesHigh != 0)
-		{
-			Debug.LogWarning("Invalid tileset width specified!");
-		}
-
-		// Build mesh and texture 
+	void Start()
+	{
+		// Build mesh and texture
 		BuildMesh();
 		BuildTexture();
 	}
+
 
 	// Generates mesh data for the tilemap
 	// Mesh built such that each tile = one square in the mesh
@@ -129,17 +118,22 @@ public class TileMap : MonoBehaviour
 	// TODO: Try making each tile a quad with proper uv mapping to avoid this step
 	void BuildTexture()
 	{
-		int textureWidth = numTilesX * tileSetResolution;
-		int textureHeight = numTilesZ * tileSetResolution;
+		// Determine size of each tile
+		int tileResolution = tileSet.TileResolution;
+
+		// Determine size of full texture
+		int textureWidth = numTilesX * tileResolution;
+		int textureHeight = numTilesZ * tileResolution;
 
 		Texture2D texture = new Texture2D(textureWidth, textureHeight);
 
-		for(int y = 0; y < numTilesX; y++)
+		for(int y = 0; y < numTilesZ; y++)
 		{
-			for(int x = 0; x < numTilesZ; x++)
+			for(int x = 0; x < numTilesX; x++)
 			{
-				Color[] p = tileSet.GetPixels(16, 0, tileSetResolution, tileSetResolution);
-				texture.SetPixels(x * tileSetResolution, y * tileSetResolution, tileSetResolution, tileSetResolution, p);
+				// TODO: Remove hardcoded tile number in favor of TileMapData
+				Color[] p = tileSet.GetTilePixels(dbg_TileNumber);
+				texture.SetPixels(x * tileResolution, y * tileResolution, tileResolution, tileResolution, p);
 			}
 		}
 
@@ -155,6 +149,8 @@ public class TileMap : MonoBehaviour
 	// Public functions for inspector mode
 	public void InspectorRefresh()
 	{
+		tileSet.InspectorRefresh();
+		Awake();
 		Start();
 	}
 }

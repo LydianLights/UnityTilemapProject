@@ -25,12 +25,13 @@ public class TileSet : MonoBehaviour
 		// TODO: Improve error handling
 		if(tileSetTexture.width % TilesWide != 0 || tileSetTexture.height % TilesHigh != 0)
 		{
-			Debug.LogWarning("Tileset texture not divided evenly into tiles! Check 'Tiles Wide' property in inspector.");
+			Debug.LogWarning("Error at " + this.name + ": Tileset texture not divided evenly into tiles! Check 'Tiles Wide' property in inspector.");
 		}
 	}
 
 	// Returns a Color[] corresponding to the requested tile
 	// Returns null on invalid index
+	// TODO: Currently indexes tiles from bottom left instead of top left
 	public Color[] GetTilePixels(int tileIndex)
 	{
 		// TODO: Proper exception handling

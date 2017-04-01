@@ -5,6 +5,7 @@ using UnityEngine;
 [RequireComponent (typeof(MeshFilter))]
 [RequireComponent (typeof(MeshRenderer))]
 [RequireComponent (typeof(MeshCollider))]
+[RequireComponent (typeof(TileMapData))]
 public class TileMapGFX : MonoBehaviour
 {
 	// DEBUG
