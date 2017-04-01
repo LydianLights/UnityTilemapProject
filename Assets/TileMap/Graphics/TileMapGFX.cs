@@ -2,22 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 [RequireComponent (typeof(MeshFilter))]
 [RequireComponent (typeof(MeshRenderer))]
 [RequireComponent (typeof(MeshCollider))]
 [RequireComponent (typeof(TileMapData))]
 public class TileMapGFX : MonoBehaviour
 {
-	// DEBUG
-	public int dbg_TileNumber;
-
 	// Tileset to load tiles from
 	[SerializeField] TileSet tileSet;
 
-	// Dimensions of tilemap in terms of tiles
-	public int numTilesX;
-	public int numTilesZ;
-	int numTiles;
+	// Data describing the tilemap
+	TileMapData data;
 
 	// Unity scale of the tilemap
 	public float tileScale = 1.0f;
@@ -25,8 +21,7 @@ public class TileMapGFX : MonoBehaviour
 
 	void Awake()
 	{
-		// Initialize tilemap data
-		numTiles = numTilesX * numTilesZ;
+		data = GetComponent<TileMapData>();
 	}
 
 	void Start()
@@ -43,12 +38,12 @@ public class TileMapGFX : MonoBehaviour
 	void BuildMesh()
 	{
 		// Dimensions of mesh in terms of vertices
-		int numVerticesX = numTilesX + 1;
-		int numVerticesZ = numTilesZ + 1;
+		int numVerticesX = data.TilesWide + 1;
+		int numVerticesZ = data.TilesHigh + 1;
 		int numVertices = numVerticesX * numVerticesZ;
 
 		// Number of triangles in the mesh
-		int numTriangles = 2 * numTiles;
+		int numTriangles = 2 * data.NumTiles;
 
 		// Initialize arrays for mesh data
 		Vector3[] vertices = new Vector3[numVertices];
@@ -76,11 +71,11 @@ public class TileMapGFX : MonoBehaviour
 		}
 
 		// Generate triangles for each tile
-		for (int z = 0; z < numTilesZ; z++)
+		for (int z = 0; z < data.TilesHigh; z++)
 		{
-			for(int x = 0; x < numTilesX; x++)
+			for(int x = 0; x < data.TilesWide; x++)
 			{
-				int currentTile = z * numTilesX + x;
+				int currentTile = z * data.TilesWide + x;
 				int topLeftVertex = currentTile + z;
 
 				// Triangle 1
@@ -122,17 +117,16 @@ public class TileMapGFX : MonoBehaviour
 		int tileResolution = tileSet.TileResolution;
 
 		// Determine size of full texture
-		int textureWidth = numTilesX * tileResolution;
-		int textureHeight = numTilesZ * tileResolution;
+		int textureWidth = data.TilesWide * tileResolution;
+		int textureHeight = data.TilesHigh * tileResolution;
 
 		Texture2D texture = new Texture2D(textureWidth, textureHeight);
 
-		for(int y = 0; y < numTilesZ; y++)
+		for(int y = 0; y < data.TilesHigh; y++)
 		{
-			for(int x = 0; x < numTilesX; x++)
+			for(int x = 0; x < data.TilesWide; x++)
 			{
-				// TODO: Remove hardcoded tile number in favor of TileMapData
-				Color[] p = tileSet.GetTilePixels(dbg_TileNumber);
+				Color[] p = tileSet.GetTilePixels(data.GetTile(x, y));
 				texture.SetPixels(x * tileResolution, y * tileResolution, tileResolution, tileResolution, p);
 			}
 		}
@@ -147,10 +141,19 @@ public class TileMapGFX : MonoBehaviour
 
 
 	// Public functions for inspector mode
-	public void InspectorRefresh()
+	#if UNITY_EDITOR
+	public void InspectorRefreshAwake()
 	{
-		tileSet.InspectorRefresh();
 		Awake();
-		Start();
+		tileSet.InspectorRefreshAwake();
+		data.InspectorRefreshAwake();
 	}
+
+	public void InspectorRefreshStart()
+	{
+		Start();
+		tileSet.InspectorRefreshStart();
+		data.InspectorRefreshStart();
+	}
+	#endif
 }

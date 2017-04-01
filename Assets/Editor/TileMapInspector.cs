@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -6,14 +7,19 @@ using UnityEngine;
 [CustomEditor(typeof(TileMapGFX))]
 public class TileMapInspector : Editor
 {
+
 	public override void OnInspectorGUI()
 	{
-		base.OnInspectorGUI();
+		DrawDefaultInspector();
 
+		// Adds a button to rebuild the tilemap
 		if(GUILayout.Button("Refresh"))
 		{
 			TileMapGFX tileMap = (TileMapGFX)target;
-			tileMap.InspectorRefresh();
+
+			// Calls awake, and then start on the tilemap
+			tileMap.InspectorRefreshAwake();
+			tileMap.InspectorRefreshStart();
 		}
 	}
 }

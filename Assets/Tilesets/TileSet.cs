@@ -48,8 +48,15 @@ public class TileSet : MonoBehaviour
 
 
 	// Public functions for inspector mode
-	public void InspectorRefresh()
+	#if UNITY_EDITOR
+	public void InspectorRefreshAwake()
 	{
 		Awake();
 	}
+
+	public void InspectorRefreshStart()
+	{
+		//Start();
+	}
+	#endif
 }
