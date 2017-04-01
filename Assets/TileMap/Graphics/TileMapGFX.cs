@@ -26,9 +26,8 @@ public class TileMapGFX : MonoBehaviour
 
 	void Start()
 	{
-		// Build mesh and texture
+		// Build mesh and texture it
 		BuildMesh();
-		BuildTexture();
 	}
 
 
@@ -37,13 +36,10 @@ public class TileMapGFX : MonoBehaviour
 	// TODO: Re-evalutate mesh construction -- try one quad per tile for efficient mapping of tile texture
 	void BuildMesh()
 	{
-		// Dimensions of mesh in terms of vertices
-		int numVerticesX = data.TilesWide + 1;
-		int numVerticesZ = data.TilesHigh + 1;
-		int numVertices = numVerticesX * numVerticesZ;
-
-		// Number of triangles in the mesh
-		int numTriangles = 2 * data.NumTiles;
+		// DEBUG: Hardcoded for testing
+		int numVertices = 8;
+		int numTriangles = 4;
+		int numTiles = 2;
 
 		// Initialize arrays for mesh data
 		Vector3[] vertices = new Vector3[numVertices];
@@ -52,43 +48,61 @@ public class TileMapGFX : MonoBehaviour
 		Vector2[] uv = new Vector2[numVertices];
 
 
-		// Generate verticies/normals/uvs
-		for (int z = 0; z < numVerticesZ; z++)
+		// DEBUG: Hardcoded for testing
+		int dbg_offset = 2;
+		vertices[0] = new Vector3(0, 0, 0);
+		vertices[1] = new Vector3(1, 0, 0);
+		vertices[2] = new Vector3(0, 0, 1);
+		vertices[3] = new Vector3(1, 0, 1);
+
+		vertices[4] = new Vector3(0 + dbg_offset, 0, 0);
+		vertices[5] = new Vector3(1 + dbg_offset, 0, 0);
+		vertices[6] = new Vector3(0 + dbg_offset, 0, 1);
+		vertices[7] = new Vector3(1 + dbg_offset, 0, 1);
+
+
+		// DEBUG: Hardcoded for testing
+		triangles[0] = 0;
+		triangles[1] = 2;
+		triangles[2] = 1;
+
+		triangles[3] = 1;
+		triangles[4] = 2;
+		triangles[5] = 3;
+
+		triangles[6] = 4;
+		triangles[7] = 6;
+		triangles[8] = 5;
+
+		triangles[9] = 5;
+		triangles[10] = 6;
+		triangles[11] = 7;
+
+
+		// DEBUG: Hardcoded for testing
+		uv[0] = new Vector2(0, 0);
+		uv[1] = new Vector2((float)tileSet.TileResolution / tileSet.Texture.width, 0);
+		uv[2] = new Vector2(0, (float)tileSet.TileResolution / tileSet.Texture.height);
+		uv[3] = new Vector2((float)tileSet.TileResolution / tileSet.Texture.width, (float)tileSet.TileResolution / tileSet.Texture.height);
+
+		uv[4] = new Vector2((float)tileSet.TileResolution / tileSet.Texture.width, (float)tileSet.TileResolution / tileSet.Texture.height);
+		uv[5] = new Vector2(2 * (float)tileSet.TileResolution / tileSet.Texture.width, (float)tileSet.TileResolution / tileSet.Texture.height);
+		uv[6] = new Vector2((float)tileSet.TileResolution / tileSet.Texture.width, 2 * (float)tileSet.TileResolution / tileSet.Texture.height);
+		uv[7] = new Vector2(2 * (float)tileSet.TileResolution / tileSet.Texture.width, 2 * (float)tileSet.TileResolution / tileSet.Texture.height);
+
+
+		for (int i = 0; i < numVertices; i++)
 		{
-			for (int x = 0; x < numVerticesX; x++)
-			{
-				int currentVertex = z * numVerticesX + x;
-
-				// Place vertex at coordinates (x, z) * tileScale
-				vertices[currentVertex] = new Vector3(x * tileScale, 0, z * tileScale);
-				normals[currentVertex] = Vector3.up;
-
-				// Evenly map texture to mesh
-				float uvX = (float)x / (float)(numVerticesX - 1);
-				float uvZ = (float)z / (float)(numVerticesZ - 1);
-				uv[currentVertex] = new Vector2(uvX, uvZ);
-			}
+			normals[i] = Vector3.up;
 		}
 
-		// Generate triangles for each tile
-		for (int z = 0; z < data.TilesHigh; z++)
-		{
-			for(int x = 0; x < data.TilesWide; x++)
-			{
-				int currentTile = z * data.TilesWide + x;
-				int topLeftVertex = currentTile + z;
 
-				// Triangle 1
-				triangles[6 * currentTile + 0] = topLeftVertex + 0;
-				triangles[6 * currentTile + 1] = topLeftVertex + 0 + numVerticesX;
-				triangles[6 * currentTile + 2] = topLeftVertex + 1 + numVerticesX;
 
-				// Triangle 2
-				triangles[6 * currentTile + 3] = topLeftVertex + 0;
-				triangles[6 * currentTile + 4] = topLeftVertex + 1 + numVerticesX;
-				triangles[6 * currentTile + 5] = topLeftVertex + 1;
-			}
-		}
+
+
+
+
+
 
 
 		// Create new mesh and populate with mesh data
@@ -105,38 +119,7 @@ public class TileMapGFX : MonoBehaviour
 		MeshCollider meshCollider = GetComponent<MeshCollider>();
 
 		meshFilter.mesh = mesh;
-	}
-
-
-	// Procedurally generate texture from tileset
-	// Builds new texture of entire tilemap and applies to mesh
-	// TODO: Try making each tile a quad with proper uv mapping to avoid this step
-	void BuildTexture()
-	{
-		// Determine size of each tile
-		int tileResolution = tileSet.TileResolution;
-
-		// Determine size of full texture
-		int textureWidth = data.TilesWide * tileResolution;
-		int textureHeight = data.TilesHigh * tileResolution;
-
-		Texture2D texture = new Texture2D(textureWidth, textureHeight);
-
-		for(int y = 0; y < data.TilesHigh; y++)
-		{
-			for(int x = 0; x < data.TilesWide; x++)
-			{
-				Color[] p = tileSet.GetTilePixels(data.GetTile(x, y));
-				texture.SetPixels(x * tileResolution, y * tileResolution, tileResolution, tileResolution, p);
-			}
-		}
-
-		texture.filterMode = FilterMode.Point;
-		texture.Apply();
-
-		// TODO: sharedMaterial vs material
-		MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
-		meshRenderer.sharedMaterial.mainTexture = texture;
+		meshRenderer.sharedMaterial.mainTexture = tileSet.Texture;
 	}
 
 

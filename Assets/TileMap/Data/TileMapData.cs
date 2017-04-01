@@ -39,6 +39,7 @@ public class TileMapData : MonoBehaviour
 	}
 
 	// Decrypts CSV map data file into a 2D int array of tile data
+	// TODO: Tilemap is flipped vertically from text file
 	int[][] ParseTextToMapData(TextAsset mapDataText)
 	{
 		// Split each line to a string[]

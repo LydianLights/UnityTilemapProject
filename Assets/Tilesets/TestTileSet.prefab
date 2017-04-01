@@ -51,5 +51,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a5f6809a6b0dfd4a938430131a9483a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tileSetTexture: {fileID: 2800000, guid: 80a1c36ab9908174ebed01a283172467, type: 3}
+  _texture: {fileID: 2800000, guid: 80a1c36ab9908174ebed01a283172467, type: 3}
   _tilesWide: 16
