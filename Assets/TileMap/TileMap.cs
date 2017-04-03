@@ -24,7 +24,7 @@ public class TileMap : MonoBehaviour
 	}
 
 
-	// Retrieves tile at the specified (x,y) coordinate
+	// Retrieves tile at the specified (x,y) coordinate -- origin at bottom left
 	// Returns -1 if invalid indicies
 	// TODO: Add a tile data structure
 	// TODO: Proper exception handling
@@ -35,11 +35,28 @@ public class TileMap : MonoBehaviour
 			return -1;
 		}
 
-		return mapData[y][x];
+		return mapData[TilesHigh - 1 - y][x];
+	}
+
+
+	// Retrieves tile by index, counting from bottom left
+	// Returns -1 if invalid indicies
+	// TODO: Add a tile data structure
+	// TODO: Proper exception handling
+	public int GetTileByIndex(int i)
+	{
+		if (i < 0 || i >= NumTiles)
+		{
+			return -1;
+		}
+
+		int x = i % TilesWide;
+		int y = i / TilesWide;
+
+		return GetTile(x, y);
 	}
 
 	// Decrypts CSV map data file into a 2D int array of tile data
-	// TODO: Tilemap is flipped vertically from text file
 	int[][] ParseTextToMapData(TextAsset mapDataText)
 	{
 		// Split each line to a string[]

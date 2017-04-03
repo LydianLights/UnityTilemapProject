@@ -9,9 +9,6 @@ using UnityEngine;
 [RequireComponent (typeof(TileMap))]
 public class TileMapMeshBuilder : MonoBehaviour
 {
-	// DEBUG
-	public int dbg_FillTile = 0;
-
 	// The tilemap to build the mesh for
 	TileMap map;
 
@@ -61,8 +58,7 @@ public class TileMapMeshBuilder : MonoBehaviour
 		// Iterate through each tile and set verticies/triangles/uvs
 		for(int i = 0; i < map.NumTiles; i++)
 		{
-			// DEBUG: hardcoded index for testing
-			int currentTileIndex = dbg_FillTile;
+			int currentTileIndex = map.GetTileByIndex(i);
 
 			int vertOffset = 4 * i;
 			int triOffset = 6 * i;
