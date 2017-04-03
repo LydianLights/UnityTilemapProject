@@ -9,6 +9,9 @@ using UnityEngine;
 [RequireComponent (typeof(TileMap))]
 public class TileMapMeshBuilder : MonoBehaviour
 {
+	// DEBUG
+	public int dbg_FillTile = 0;
+
 	// The tilemap to build the mesh for
 	TileMap map;
 
@@ -21,8 +24,8 @@ public class TileMapMeshBuilder : MonoBehaviour
 	MeshCollider meshCollider;
 
 	// Unity scale of the tilemap
-	[SerializeField] float tileScale = 1.0f;
-	public float TileScale {get { return tileScale; } private set { tileScale = value; } }
+	[SerializeField] float _tileScale = 1.0f;
+	public float TileScale {get { return _tileScale; } private set { _tileScale = value; } }
 
 
 	void Awake()
@@ -42,12 +45,11 @@ public class TileMapMeshBuilder : MonoBehaviour
 
 
 	// Generates mesh data for the tilemap
-	// Mesh built such that each tile = one square in the mesh
-	// TODO: Re-evalutate mesh construction -- try one quad per tile for efficient mapping of tile texture
+	// Mesh built such that each tile = one quad in the mesh
 	void BuildMesh()
 	{
 		int numVertices = 4 * map.NumTiles;
-		int numTriangles = 2 * 3 * map.NumTiles;
+		int numTriangles = 2 * map.NumTiles * 3;
 
 		// Initialize arrays for mesh data
 		Vector3[] vertices = new Vector3[numVertices];
@@ -56,21 +58,30 @@ public class TileMapMeshBuilder : MonoBehaviour
 		Vector2[] uv = new Vector2[numVertices];
 
 
-		// Iterate through each tile and set verticies/triangles
+		// Iterate through each tile and set verticies/triangles/uvs
 		for(int i = 0; i < map.NumTiles; i++)
 		{
+			// DEBUG: hardcoded index for testing
+			int currentTileIndex = dbg_FillTile;
+
 			int vertOffset = 4 * i;
-			int triOffset = 2 * 3 * i;
-			int xOffset = i % map.TilesWide;
-			int zOffset =  i / map.TilesWide;
-			float yOffset = 0;
+			int triOffset = 6 * i;
 
 
 			// Set vertex coords of current tile
-			vertices[vertOffset + 0] = new Vector3(		xOffset * TileScale,			yOffset,		zOffset * TileScale			);
-			vertices[vertOffset + 1] = new Vector3(		(xOffset + 1) * TileScale,		yOffset,		zOffset * TileScale			);
-			vertices[vertOffset + 2] = new Vector3(		xOffset * TileScale,			yOffset,		(zOffset + 1) * TileScale	);
-			vertices[vertOffset + 3] = new Vector3(		(xOffset + 1) * TileScale,		yOffset,		(zOffset + 1) * TileScale	);
+			int xOffset = i % map.TilesWide;
+			int zOffset =  i / map.TilesWide;
+
+			float y = 0;
+			float x1 = xOffset * TileScale;
+			float x2 = (xOffset + 1) * TileScale;
+			float z1 = zOffset * TileScale;
+			float z2 = (zOffset + 1) * TileScale;
+
+			vertices[vertOffset + 0] = new Vector3(x1, y, z1);
+			vertices[vertOffset + 1] = new Vector3(x2, y, z1);
+			vertices[vertOffset + 2] = new Vector3(x1, y, z2);
+			vertices[vertOffset + 3] = new Vector3(x2, y, z2);
 
 
 			// Set the triangles of current tile
@@ -83,6 +94,23 @@ public class TileMapMeshBuilder : MonoBehaviour
 			triangles[triOffset + 3] = vertOffset + 1;
 			triangles[triOffset + 4] = vertOffset + 2;
 			triangles[triOffset + 5] = vertOffset + 3;
+
+
+			// Set up uvs for current tile
+			// Gets pixel coordinates of tile's bottom-left corner in tileset texture
+			Vector2 tileOffset = tileSet.GetTileTextureOffset(currentTileIndex);
+
+			// Find each corner of tile as a percentage of full texture size
+			float uv_x1 = tileOffset.x / tileSet.Texture.width;
+			float uv_x2 = (tileOffset.x + tileSet.TileResolution) / tileSet.Texture.width;
+			float uv_y1 = tileOffset.y / tileSet.Texture.height;
+			float uv_y2 = (tileOffset.y + tileSet.TileResolution) / tileSet.Texture.height;
+
+
+			uv[vertOffset + 0] = new Vector2(uv_x1, uv_y1);
+			uv[vertOffset + 1] = new Vector2(uv_x2, uv_y1);
+			uv[vertOffset + 2] = new Vector2(uv_x1, uv_y2);
+			uv[vertOffset + 3] = new Vector2(uv_x2, uv_y2);
 		}
 
 
@@ -93,34 +121,12 @@ public class TileMapMeshBuilder : MonoBehaviour
 		}
 
 
-		// DEBUG: Hardcoded for testing
-		uv[0] = new Vector2(0, 0);
-		uv[1] = new Vector2((float)tileSet.TileResolution / tileSet.Texture.width, 0);
-		uv[2] = new Vector2(0, (float)tileSet.TileResolution / tileSet.Texture.height);
-		uv[3] = new Vector2((float)tileSet.TileResolution / tileSet.Texture.width, (float)tileSet.TileResolution / tileSet.Texture.height);
-
-		uv[4] = new Vector2((float)tileSet.TileResolution / tileSet.Texture.width, (float)tileSet.TileResolution / tileSet.Texture.height);
-		uv[5] = new Vector2(2 * (float)tileSet.TileResolution / tileSet.Texture.width, (float)tileSet.TileResolution / tileSet.Texture.height);
-		uv[6] = new Vector2((float)tileSet.TileResolution / tileSet.Texture.width, 2 * (float)tileSet.TileResolution / tileSet.Texture.height);
-		uv[7] = new Vector2(2 * (float)tileSet.TileResolution / tileSet.Texture.width, 2 * (float)tileSet.TileResolution / tileSet.Texture.height);
-
-
-
-
-
-
-
-
-
-
-
 		// Create new mesh and populate with mesh data
 		Mesh mesh = new Mesh();
 		mesh.vertices = vertices;
 		mesh.triangles = triangles;
 		mesh.normals = normals;
 		mesh.uv = uv;
-
 
 
 		meshFilter.mesh = mesh;

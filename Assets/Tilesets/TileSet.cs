@@ -30,21 +30,14 @@ public class TileSet : MonoBehaviour
 		}
 	}
 
-	// Returns a Color[] corresponding to the requested tile
-	// Returns null on invalid index
-	// TODO: Currently indexes tiles from bottom left instead of top left
-	public Color[] GetTilePixels(int tileIndex)
+
+	// Returns the position of the bottom-left corner of the tile within the texture
+	public Vector2 GetTileTextureOffset(int tileIndex)
 	{
-		// TODO: Proper exception handling
-		if (tileIndex < 0 || tileIndex >= NumTiles)
-		{
-			return null;
-		}
+		int xOffset = tileIndex % TilesWide;
+		int yOffset = TilesHigh - 1 - (tileIndex / TilesWide);
 
-		int x = tileIndex % TilesWide;
-		int y = tileIndex / TilesWide;
-
-		return Texture.GetPixels(x * TileResolution, y * TileResolution, TileResolution, TileResolution);
+		return new Vector2(xOffset * TileResolution, yOffset * TileResolution);
 	}
 
 
