@@ -6,22 +6,32 @@ using UnityEngine;
 [RequireComponent (typeof(MeshFilter))]
 [RequireComponent (typeof(MeshRenderer))]
 [RequireComponent (typeof(MeshCollider))]
-[RequireComponent (typeof(TileMapData))]
-public class TileMapGFX : MonoBehaviour
+[RequireComponent (typeof(TileMap))]
+public class TileMapMeshBuilder : MonoBehaviour
 {
+	// The tilemap to build the mesh for
+	TileMap map;
+
 	// Tileset to load tiles from
 	[SerializeField] TileSet tileSet;
 
-	// Data describing the tilemap
-	TileMapData data;
+	// Object mesh components
+	MeshFilter meshFilter;
+	MeshRenderer meshRenderer;
+	MeshCollider meshCollider;
 
 	// Unity scale of the tilemap
-	public float tileScale = 1.0f;
+	[SerializeField] float tileScale = 1.0f;
+	public float TileScale {get { return tileScale; } private set { tileScale = value; } }
 
 
 	void Awake()
 	{
-		data = GetComponent<TileMapData>();
+		// Get reference to game object components
+		meshFilter = GetComponent<MeshFilter>();
+		meshRenderer = GetComponent<MeshRenderer>();
+		meshCollider = GetComponent<MeshCollider>();
+		map = GetComponent<TileMap>();
 	}
 
 	void Start()
@@ -36,10 +46,8 @@ public class TileMapGFX : MonoBehaviour
 	// TODO: Re-evalutate mesh construction -- try one quad per tile for efficient mapping of tile texture
 	void BuildMesh()
 	{
-		// DEBUG: Hardcoded for testing
-		int numVertices = 8;
-		int numTriangles = 4;
-		int numTiles = 2;
+		int numVertices = 4 * map.NumTiles;
+		int numTriangles = 2 * 3 * map.NumTiles;
 
 		// Initialize arrays for mesh data
 		Vector3[] vertices = new Vector3[numVertices];
@@ -48,35 +56,41 @@ public class TileMapGFX : MonoBehaviour
 		Vector2[] uv = new Vector2[numVertices];
 
 
-		// DEBUG: Hardcoded for testing
-		int dbg_offset = 2;
-		vertices[0] = new Vector3(0, 0, 0);
-		vertices[1] = new Vector3(1, 0, 0);
-		vertices[2] = new Vector3(0, 0, 1);
-		vertices[3] = new Vector3(1, 0, 1);
-
-		vertices[4] = new Vector3(0 + dbg_offset, 0, 0);
-		vertices[5] = new Vector3(1 + dbg_offset, 0, 0);
-		vertices[6] = new Vector3(0 + dbg_offset, 0, 1);
-		vertices[7] = new Vector3(1 + dbg_offset, 0, 1);
+		// Iterate through each tile and set verticies/triangles
+		for(int i = 0; i < map.NumTiles; i++)
+		{
+			int vertOffset = 4 * i;
+			int triOffset = 2 * 3 * i;
+			int xOffset = i % map.TilesWide;
+			int zOffset =  i / map.TilesWide;
+			float yOffset = 0;
 
 
-		// DEBUG: Hardcoded for testing
-		triangles[0] = 0;
-		triangles[1] = 2;
-		triangles[2] = 1;
+			// Set vertex coords of current tile
+			vertices[vertOffset + 0] = new Vector3(		xOffset * TileScale,			yOffset,		zOffset * TileScale			);
+			vertices[vertOffset + 1] = new Vector3(		(xOffset + 1) * TileScale,		yOffset,		zOffset * TileScale			);
+			vertices[vertOffset + 2] = new Vector3(		xOffset * TileScale,			yOffset,		(zOffset + 1) * TileScale	);
+			vertices[vertOffset + 3] = new Vector3(		(xOffset + 1) * TileScale,		yOffset,		(zOffset + 1) * TileScale	);
 
-		triangles[3] = 1;
-		triangles[4] = 2;
-		triangles[5] = 3;
 
-		triangles[6] = 4;
-		triangles[7] = 6;
-		triangles[8] = 5;
+			// Set the triangles of current tile
+			// Triangle 1
+			triangles[triOffset + 0] = vertOffset + 0;
+			triangles[triOffset + 1] = vertOffset + 2;
+			triangles[triOffset + 2] = vertOffset + 1;
 
-		triangles[9] = 5;
-		triangles[10] = 6;
-		triangles[11] = 7;
+			// Triangle 2
+			triangles[triOffset + 3] = vertOffset + 1;
+			triangles[triOffset + 4] = vertOffset + 2;
+			triangles[triOffset + 5] = vertOffset + 3;
+		}
+
+
+		// Set normal vector for each vertex
+		for (int i = 0; i < numVertices; i++)
+		{
+			normals[i] = Vector3.up;
+		}
 
 
 		// DEBUG: Hardcoded for testing
@@ -90,11 +104,6 @@ public class TileMapGFX : MonoBehaviour
 		uv[6] = new Vector2((float)tileSet.TileResolution / tileSet.Texture.width, 2 * (float)tileSet.TileResolution / tileSet.Texture.height);
 		uv[7] = new Vector2(2 * (float)tileSet.TileResolution / tileSet.Texture.width, 2 * (float)tileSet.TileResolution / tileSet.Texture.height);
 
-
-		for (int i = 0; i < numVertices; i++)
-		{
-			normals[i] = Vector3.up;
-		}
 
 
 
@@ -113,10 +122,6 @@ public class TileMapGFX : MonoBehaviour
 		mesh.uv = uv;
 
 
-		// Assign mesh to filter/renderer/collider
-		MeshFilter meshFilter = GetComponent<MeshFilter>();
-		MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
-		MeshCollider meshCollider = GetComponent<MeshCollider>();
 
 		meshFilter.mesh = mesh;
 		meshRenderer.sharedMaterial.mainTexture = tileSet.Texture;
@@ -129,14 +134,14 @@ public class TileMapGFX : MonoBehaviour
 	{
 		Awake();
 		tileSet.InspectorRefreshAwake();
-		data.InspectorRefreshAwake();
+		map.InspectorRefreshAwake();
 	}
 
 	public void InspectorRefreshStart()
 	{
 		Start();
 		tileSet.InspectorRefreshStart();
-		data.InspectorRefreshStart();
+		map.InspectorRefreshStart();
 	}
 	#endif
 }

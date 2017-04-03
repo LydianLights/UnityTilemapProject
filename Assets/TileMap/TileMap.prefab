@@ -25,7 +25,7 @@ GameObject:
   - component: {fileID: 33366193891474652}
   - component: {fileID: 114645959816190138}
   m_Layer: 0
-  m_Name: TileMapPrefab
+  m_Name: TileMap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -107,10 +107,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de7fa3112f3b6c245a4c5f97e846e59c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dbg_TileNumber: 0
   tileSet: {fileID: 0}
-  numTilesX: 16
-  numTilesZ: 8
   tileScale: 1
 --- !u!114 &114939890175395882
 MonoBehaviour:

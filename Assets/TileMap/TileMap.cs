@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TileMapData : MonoBehaviour
+public class TileMap : MonoBehaviour
 {
 	// TODO: Explore other data storage options
 	[SerializeField] TextAsset mapDataText;

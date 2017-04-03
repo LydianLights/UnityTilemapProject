@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(TileMapGFX))]
+[CustomEditor(typeof(TileMapMeshBuilder))]
 public class TileMapInspector : Editor
 {
 
@@ -15,7 +15,7 @@ public class TileMapInspector : Editor
 		// Adds a button to rebuild the tilemap
 		if(GUILayout.Button("Refresh"))
 		{
-			TileMapGFX tileMap = (TileMapGFX)target;
+			TileMapMeshBuilder tileMap = (TileMapMeshBuilder)target;
 
 			// Calls awake, and then start on the tilemap
 			tileMap.InspectorRefreshAwake();
