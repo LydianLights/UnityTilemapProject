@@ -227,12 +227,12 @@ Prefab:
         type: 2}
       propertyPath: mapDataText
       value: 
-      objectReference: {fileID: 4900000, guid: 9c2f6394332a5a44c9d7015cc65ec9ba, type: 3}
+      objectReference: {fileID: 4900000, guid: 3461a9799229b4143abbb1f6e44c0bdc, type: 3}
     - target: {fileID: 33366193891474652, guid: f5ffc3292bd227246b58ed16bc418fbc,
         type: 2}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: 2117059375}
+      objectReference: {fileID: 2011438955}
     - target: {fileID: 23128480416970806, guid: f5ffc3292bd227246b58ed16bc418fbc,
         type: 2}
       propertyPath: m_Enabled
@@ -257,10 +257,15 @@ Prefab:
       propertyPath: _tileScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 114939890175395882, guid: f5ffc3292bd227246b58ed16bc418fbc,
+        type: 2}
+      propertyPath: mapTextFile
+      value: 
+      objectReference: {fileID: 4900000, guid: 9c2f6394332a5a44c9d7015cc65ec9ba, type: 3}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: f5ffc3292bd227246b58ed16bc418fbc, type: 2}
   m_IsPrefabParent: 0
---- !u!43 &2117059375
+--- !u!43 &2011438955
 Mesh:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}

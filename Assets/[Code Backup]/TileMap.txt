@@ -1,16 +1,13 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class TileMap : MonoBehaviour
 {
 	// TODO: Explore other data storage options
-	[SerializeField] TextAsset mapTextFile;
+	[SerializeField] TextAsset mapDataText;
 
-	// Array of tile indicies referenced by coordinate [row, column]
-	int[,] mapData;
-
-	// Public properties
+	int[][] mapData;
 	public int TilesWide { get; private set; }
 	public int TilesHigh { get; private set; }
 	public int NumTiles { get; private set; }
@@ -19,15 +16,18 @@ public class TileMap : MonoBehaviour
 	// TODO: Make sure MapData is square/not empty
 	void Awake()
 	{
-		mapData = ReadMapFromTextFile(mapTextFile);
-		TilesWide = mapData.GetLength(1);
-		TilesHigh = mapData.GetLength(0);
+		mapData = ParseTextToMapData(mapDataText);
+		TilesWide = mapData[0].Length;
+		TilesHigh = mapData.Length;
 		NumTiles = TilesWide * TilesHigh;
 	}
 
 	void Update()
 	{
-		
+		foreach (int tile in mapData)
+		{
+			tile = Random.Range(0, NumTiles);
+		}
 	}
 
 
@@ -42,7 +42,7 @@ public class TileMap : MonoBehaviour
 			return -1;
 		}
 
-		return mapData[TilesHigh - 1 - y, x];
+		return mapData[TilesHigh - 1 - y][x];
 	}
 
 
@@ -64,43 +64,31 @@ public class TileMap : MonoBehaviour
 	}
 
 	// Decrypts CSV map data file into a 2D int array of tile data
-	// Return null if improperly formatted
-	// TODO: Proper exception handling
-	int[,] ReadMapFromTextFile(TextAsset mapDataText)
+	int[][] ParseTextToMapData(TextAsset mapDataText)
 	{
-		// Split along each newline and store in an array of strings
+		// Split each line to a string[]
 		string[] lines = mapDataText.text.Split('\n');
-		int numRows = lines.Length;
+
+		// Initialize number of rows in mapData
+		int[][] mapData = new int[lines.Length][];
 
 
-		// Split each line along each comma and store in a 2D array
-		string[][] entries = new string[numRows][];
-
-		for (int i = 0; i < numRows; i++)
+		// Parse each line into an int[]
+		for (int i = 0; i < lines.Length; i++)
 		{
-			entries[i] = lines[i].Split(',');
-		}
+			// Split each entry from current line to a string
+			string[] entriesString = lines[i].Split(',');
 
-		int numColumns = entries[0].Length;
+			// Initialize int[] to store converted strings
+			int[] entries = new int[entriesString.Length];
 
-
-		// Iterate through and convert each entry to an int
-		int [,] mapData = new int[numRows, numColumns];
-
-		for (int y = 0; y < entries.Length; y++)
-		{
-			int currentRowLength = entries[y].Length;
-			if(currentRowLength != numColumns)
+			// Convert each entry to an int and store in mapData
+			for (int j = 0; j < entriesString.Length; j++)
 			{
-				return null;
-			}
-
-			for (int x = 0; x < currentRowLength; x++)
-			{
-				int.TryParse(entries[y][x], out mapData[y, x]);
+				int.TryParse(entriesString[j], out entries[j]);
+				mapData[i] = entries;
 			}
 		}
-
 		return mapData;
 	}
 
